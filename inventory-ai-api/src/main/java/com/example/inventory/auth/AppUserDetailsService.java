@@ -1,5 +1,6 @@
 package com.example.inventory.auth;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,7 +22,11 @@ public class AppUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPasswordHash())
-                .roles(user.getRoles().stream().map(Role::getName).toArray(String[]::new))
+                // authorities(), not roles(): DB names already contain the ROLE_ prefix
+                .authorities(user.getRoles().stream()
+                        .map(Role::getName)
+                        .map(SimpleGrantedAuthority::new)
+                        .toArray(SimpleGrantedAuthority[]::new))
                 .build();
     }
 }

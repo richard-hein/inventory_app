@@ -4,7 +4,11 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -40,13 +44,24 @@ public class SecurityConfig {
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/actuator/**", "/v3/api-docs/**"
                                 , "/swagger-ui.html", "/swagger-ui/**",
-                                "/products/**", "/api/auth/**")
+//                                "/products/**",
+                                "/api/auth/**")
                         .permitAll()
                         .anyRequest().authenticated())
 //                the guard. Read "Authorization: Bearer <token>"
                 .oauth2ResourceServer(o-> o.jwt(j->
                         j.jwtAuthenticationConverter(converter)))
                 .build();
+    }
+
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -66,14 +81,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter(){
+    public JwtAuthenticationConverter jwtAuthenticationConverter(){
         var authorities = new JwtGrantedAuthoritiesConverter();
-        // setting: "look in the claim named roles"
-        // configure: read authorities from the "roles" claim
+        // read authorities from the "roles" claim
         authorities.setAuthoritiesClaimName("roles");
-        // setting: "add ROLE_ in front"
-        // configure: prefix each one with ROLE_
-        authorities.setAuthorityPrefix("ROLE_");
+        // claim already holds ROLE_USER/ROLE_ADMIN — no prefix here or it becomes ROLE_ROLE_*
+        authorities.setAuthorityPrefix("");
         // handle role to authorities step
         var converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(authorities);

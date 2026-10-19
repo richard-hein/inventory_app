@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,12 @@ public class ProductController {
 
     private final ProductService service;
 
+    @GetMapping
+    public Page<ProductResponse> list(@PageableDefault(size = 20) Pageable pageable) {
+        return service.list(pageable);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProductResponse create(@Valid @RequestBody CreateProductRequest request) {
@@ -32,10 +39,5 @@ public class ProductController {
     @GetMapping("/{id}")
     public ProductResponse getById(@PathVariable Long id) {
         return service.getById(id);
-    }
-
-    @GetMapping
-    public Page<ProductResponse> list(@PageableDefault(size = 20) Pageable pageable) {
-        return service.list(pageable);
     }
 }
