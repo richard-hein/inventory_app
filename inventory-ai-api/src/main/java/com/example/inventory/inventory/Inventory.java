@@ -16,6 +16,13 @@ public class Inventory {
     @Setter
     private Long productId;
 
+    public Inventory(Long productId) {
+        this.productId = productId;
+    }
+
+    public Inventory() {
+    }
+
     @Column(nullable = false)
     @Setter
     private int quantity;

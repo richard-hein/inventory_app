@@ -18,7 +18,7 @@ public class InventoryController {
         return inventoryService.get(productId);
     }
 
-    @PutMapping("/${productId}")
+    @PutMapping("/{productId}")
     @PreAuthorize("hasRole('ADMIN')")
     public InventoryResponse set(
             @PathVariable Long productId,

@@ -20,7 +20,7 @@ public class OrderItem {
     @EmbeddedId
     private OrderItemId id;
 
-    @Column(nullable = false)
+    @Column(name = "qty", nullable = false)
     private int quantity;
 
     @Column(name="price_cents", nullable = false)

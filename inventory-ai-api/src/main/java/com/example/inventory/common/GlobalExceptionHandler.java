@@ -3,6 +3,7 @@ package com.example.inventory.common;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,4 +35,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ApiError(409, "Duplicate or constraint violation"));
     }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleOptimisticLock(
+            OptimisticLockingFailureException ex
+    ){
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiError(409, "Inventory changed concurrently retry"));
+    }
+
+
 }
